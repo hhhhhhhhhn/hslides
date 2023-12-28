@@ -1,16 +1,42 @@
+#include "hlib/hflag.h"
+#include "hlib/hfs.h"
 #include "hlib/core.h"
 #include "hlib/hstring.h"
 #include "stdio.h"
 #include <assert.h>
 #include <stdbool.h>
 
-
 void process_presentation(FILE* input, FILE* output);
 void process_slide(str slide, FILE* output);
 void process_line(str line, FILE* output);
 
-i32 main() {
-	process_presentation(stdin, stdout);
+i32 main(int argc, char** argv) {
+	str* input_path = hflag_str('i', "input", "Input file", STR("-"));
+	str* output_path = hflag_str('o', "output", "Output file", STR("-"));
+
+	hflag_parse(&argc, &argv);
+
+	FILE* input_file;
+	FILE* output_file;
+
+	if (str_eq(*input_path, STR("-"))) {
+		input_file = stdin;
+	} else {
+		input_file = hfs_open_file(*input_path, true, false);
+		if (input_file == NULL) panicf("Could not open file %.*s\n", (int)input_path->len, input_path->data);
+	}
+
+	if (str_eq(*output_path, STR("-"))) {
+		output_file = stdout;
+	} else {
+		output_file = hfs_open_file(*output_path, false, true);
+		if (output_file == NULL) panicf("Could not open file %.*s\n", (int)output_path->len, output_path->data);
+	}
+
+	process_presentation(input_file, output_file);
+
+	hfs_close_file(input_file);
+	hfs_close_file(output_file);
 }
 
 void process_presentation(FILE* input, FILE* output) {
@@ -22,9 +48,9 @@ void process_presentation(FILE* input, FILE* output) {
 	usize slide_number = 1;
 	while(input_str.len > 0) {
 		str slide = str_split_str(&input_str, STR("\n---\n"));
-		printf("<div class=\"slide\" id=\"slide%lu\">\n", slide_number);
+		fprintf(output, "<div class=\"slide\" id=\"slide%lu\">\n", slide_number);
 		process_slide(slide, output);
-		printf("</div>\n");
+		fprintf(output, "</div>\n");
 		slide_number++;
 	}
 
@@ -222,12 +248,12 @@ void process_line(str line, FILE* output) {
 		else if(line.data[i] == '\\') {
 			i++;
 		}
-		printf("%c", line.data[i]);
+		fprintf(output, "%c", line.data[i]);
 		i++;
 	}
 
 	if (asterisk_level > 0) {
 		panicf("Asterisk was not closed.\nLine: %.*s\n", (int)line.len, line.data);
 	}
-	printf(" "); // Space between every line.
+	fprintf(output, " "); // Space between every line.
 }

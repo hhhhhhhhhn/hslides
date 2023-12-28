@@ -34,4 +34,4 @@ There are also [links](https://google.com) a
 
 ---
 Errors [aq2](.)
-THis is a `code`
+This is a `code`
