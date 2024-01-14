@@ -13,6 +13,7 @@ void process_line(str line, FILE* output);
 i32 main(int argc, char** argv) {
 	str* input_path = hflag_str('i', "input", "Input file", STR("-"));
 	str* output_path = hflag_str('o', "output", "Output file", STR("-"));
+	str* template_path = hflag_str('t', "template", "Template file", STR(""));
 
 	hflag_parse(&argc, &argv);
 
@@ -33,8 +34,22 @@ i32 main(int argc, char** argv) {
 		if (output_file == NULL) panicf("Could not open file %.*s\n", (int)output_path->len, output_path->data);
 	}
 
-	process_presentation(input_file, output_file);
+	strb template_strb;
+	if(template_path->len > 0) {
+		strbResult template_result = strb_from_filepath(*template_path);
+		if(!template_result.ok) panicf("Could not open file %.*s\n", (int)template_path->len, template_path->data);
+	} else {
+		template_strb = strb_new();
+	}
+	str template_str = str_from_strb(&template_strb);
+	str template_start = str_split_str(&template_str, STR("HSLIDES_SLOT"));
+	str template_end = template_str;
 
+	fprintf(output_file, "%.*s", (int)template_start.len, template_start.data);
+	process_presentation(input_file, output_file);
+	fprintf(output_file, "%.*s", (int)template_end.len, template_end.data);
+
+	strb_free(&template_strb);
 	hfs_close_file(input_file);
 	hfs_close_file(output_file);
 }

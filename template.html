@@ -1,0 +1,82 @@
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Presentation</title>
+	<style>
+body {
+	background-color: black;
+}
+:root {
+	font-size: 3vh;
+	font-family: sans-serif;
+	color: white;
+}
+.slide {
+	height: 100%;
+	max-height: 100vh;
+	overflow: hidden;
+	text-align: center;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	display: none;
+}
+code, pre {
+	text-align: left;
+}
+ul {
+	text-align: left;
+}
+img {
+	max-height: 50vh;
+}
+	</style>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+	<script defer>
+let slide_index = 1
+
+function show_slide(new_index) {
+	if(new_index > document.body.children.length || new_index <= 0) {
+		return
+	}
+	try {
+		let old_element = document.getElementById("slide" + slide_index)
+		console.log(old_element, "slide" + slide_index)
+		old_element.style.display = "none"
+
+		let new_element = document.getElementById("slide" + new_index)
+		new_element.style.display = "flex"
+
+		slide_index = new_index
+	}
+	catch(e) {
+		console.warn(e)
+	}
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+	show_slide(1)
+	try {
+		hljs.highlightAll()
+	} catch {}
+})
+
+document.addEventListener("keydown", (e) => {
+    e = e || window.event;
+
+    if (e.keyCode == '37') {
+		show_slide(slide_index - 1)
+    }
+    else if (e.keyCode == '39') {
+		show_slide(slide_index + 1)
+    }
+})
+
+	</script>
+</head>
+<body>
+	HSLIDES_SLOT
+</body>
+</html>

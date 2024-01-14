@@ -1,3 +1,4 @@
 *.o
 hslides
 test.html
+.ccls-cache
